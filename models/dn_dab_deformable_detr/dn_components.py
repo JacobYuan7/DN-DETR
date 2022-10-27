@@ -71,7 +71,7 @@ def prepare_for_dn(dn_args, tgt_weight, embedweight, batch_size, training, num_q
     if training:
         known = [(torch.ones_like(t['labels'])).cuda() for t in targets]
         know_idx = [torch.nonzero(t) for t in known]
-        known_num = [sum(k) for k in known]
+        known_num = [sum(k) for k in known]    # 这个应该主要是为了得到每张图片上的目标数量。
         # you can uncomment this to use fix number of dn queries
         # if int(max(known_num))>0:
         #     scalar=scalar//int(max(known_num))
@@ -114,8 +114,8 @@ def prepare_for_dn(dn_args, tgt_weight, embedweight, batch_size, training, num_q
         indicator1 = torch.ones([input_label_embed.shape[0], 1]).cuda()
         input_label_embed = torch.cat([input_label_embed, indicator1], dim=1)
         input_bbox_embed = inverse_sigmoid(known_bbox_expand)
-        single_pad = int(max(known_num))
-        pad_size = int(single_pad * scalar)
+        single_pad = int(max(known_num))  # 得到这个batch内包含最多物体的数量。
+        pad_size = int(single_pad * scalar) # 得到所有group需要的pad的数量
         padding_label = torch.zeros(pad_size, hidden_dim).cuda()
         padding_bbox = torch.zeros(pad_size, 4).cuda()
         input_query_label = torch.cat([padding_label, tgt], dim=0).repeat(batch_size, 1, 1)
